@@ -2,11 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "nodemon server.js",
-    "test": "cross-env NODE_ENV=test jest --runInBand"
-  },
+  "main": "server.js",
+ "scripts": {
+  "dev": "nodemon src/server.js",
+  "test": "cross-env NODE_ENV=test jest --runInBand"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
