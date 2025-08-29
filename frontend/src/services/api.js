@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL ||
+    "https://your-backend-url.vercel.app/api",
   headers: { "Content-Type": "application/json" },
 });
 
