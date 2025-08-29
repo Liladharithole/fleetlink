@@ -74,7 +74,7 @@ const BookingList = () => {
     const prev = bookings;
     try {
       setActionLoadingId(id);
-      // optimistic: mark as completed locally
+      // optimistic: mark as completed
       setBookings((list) =>
         list.map((b) => (b._id === id ? { ...b, status: "completed" } : b))
       );
@@ -106,96 +106,159 @@ const BookingList = () => {
         <h1 className="text-2xl font-semibold text-gray-900">Bookings</h1>
       </div>
 
+      {/* Active Bookings */}
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-indigo-50 text-indigo-600">
+              {/* list icon */}
+              <span className="h-4 w-4">•</span>
+            </span>
+            Active Bookings
+          </h2>
+        </div>
         {loading ? (
           <div className="p-6 text-gray-500">Loading...</div>
         ) : error ? (
           <div className="p-6 text-red-600">{error}</div>
-        ) : bookings.length === 0 ? (
-          <div className="p-6 text-gray-500">No bookings found.</div>
+        ) : bookings.filter((b) => b.status !== "completed").length === 0 ? (
+          <div className="p-6 text-gray-500">No active bookings.</div>
         ) : (
           <ul role="list" className="divide-y divide-gray-200">
-            {bookings.map((b) => (
-              <li key={b._id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-indigo-600">
-                      {b.vehicleId?.name || "Vehicle"}
-                    </p>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {b.fromPincode} → {b.toPincode}
-                    </p>
-                    <p className="mt-1 text-sm text-gray-700">
-                      Booker:{" "}
-                      <span className="font-medium">
-                        {b.customerName || "-"}
-                      </span>{" "}
-                      ({b.customerPhone || "-"})
-                    </p>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {formatDateTime(b.startTime)} —{" "}
-                      {formatDateTime(b.endTime)}
-                    </p>
-                  </div>
-                  <div className="text-right space-y-2">
-                    <p className="text-sm text-gray-500">Capacity</p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {b.vehicleId?.capacityKg ?? "-"} kg
-                    </p>
-                    <div className="flex items-center gap-2 justify-end">
-                      <button
-                        type="button"
-                        className="px-3 py-1.5 rounded bg-green-600 text-white text-sm disabled:opacity-50"
-                        onClick={() => handleAccept(b._id)}
-                        disabled={
-                          actionLoadingId === b._id || b.status !== "pending"
-                        }
-                      >
-                        {b.status === "accepted"
-                          ? "Accepted"
-                          : actionLoadingId === b._id
-                          ? "..."
-                          : "Accept"}
-                      </button>
-                      {b.status === "accepted" && (
+            {bookings
+              .filter((b) => b.status !== "completed")
+              .map((b) => (
+                <li key={b._id} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-indigo-600">
+                        {b.vehicleId?.name || "Vehicle"}
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {b.fromPincode} → {b.toPincode}
+                      </p>
+                      <p className="mt-1 text-sm text-gray-700">
+                        Booker:{" "}
+                        <span className="font-medium">
+                          {b.customerName || "-"}
+                        </span>{" "}
+                        ({b.customerPhone || "-"})
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {formatDateTime(b.startTime)} —{" "}
+                        {formatDateTime(b.endTime)}
+                      </p>
+                    </div>
+                    <div className="text-right space-y-2">
+                      <p className="text-sm text-gray-500">Capacity</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {b.vehicleId?.capacityKg ?? "-"} kg
+                      </p>
+                      <div className="flex items-center gap-2 justify-end">
                         <button
                           type="button"
-                          className="px-3 py-1.5 rounded bg-blue-600 text-white text-sm disabled:opacity-50"
-                          onClick={() => handleComplete(b._id)}
+                          className="px-3 py-1.5 rounded bg-green-600 text-white text-sm disabled:opacity-50"
+                          onClick={() => handleAccept(b._id)}
+                          disabled={
+                            actionLoadingId === b._id || b.status !== "pending"
+                          }
+                        >
+                          {b.status === "accepted"
+                            ? "Accepted"
+                            : actionLoadingId === b._id
+                            ? "..."
+                            : "Accept"}
+                        </button>
+                        {b.status === "accepted" && (
+                          <button
+                            type="button"
+                            className="px-3 py-1.5 rounded bg-blue-600 text-white text-sm disabled:opacity-50"
+                            onClick={() => handleComplete(b._id)}
+                            disabled={actionLoadingId === b._id}
+                          >
+                            {actionLoadingId === b._id ? "..." : "Complete"}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className={`px-3 py-1.5 rounded text-white text-sm disabled:opacity-50 ${
+                            b.status === "accepted"
+                              ? "bg-red-400"
+                              : "bg-red-600"
+                          }`}
+                          onClick={() => {
+                            if (b.status === "accepted") {
+                              const ok = window.confirm(
+                                "This booking is accepted. Are you sure you want to reject and delete it?"
+                              );
+                              if (!ok) return;
+                            }
+                            handleReject(b._id);
+                          }}
                           disabled={actionLoadingId === b._id}
                         >
-                          {actionLoadingId === b._id ? "..." : "Complete"}
+                          {actionLoadingId === b._id ? "..." : "Reject"}
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        className={`px-3 py-1.5 rounded text-white text-sm disabled:opacity-50 ${
-                          b.status === "accepted" ? "bg-red-400" : "bg-red-600"
-                        }`}
-                        onClick={() => {
-                          if (b.status === "accepted") {
-                            const ok = window.confirm(
-                              "This booking is accepted. Are you sure you want to reject and delete it?"
-                            );
-                            if (!ok) return;
-                          }
-                          handleReject(b._id);
-                        }}
-                        disabled={
-                          actionLoadingId === b._id || b.status === "completed"
-                        }
-                      >
-                        {actionLoadingId === b._id
-                          ? "..."
-                          : b.status === "completed"
-                          ? "Rejected"
-                          : "Reject"}
-                      </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Booking History */}
+      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-gray-600">
+              {/* check icon */}
+              <span className="h-4 w-4">✓</span>
+            </span>
+            Booking History
+          </h2>
+        </div>
+        {loading ? (
+          <div className="p-6 text-gray-500">Loading...</div>
+        ) : error ? (
+          <div className="p-6 text-red-600">{error}</div>
+        ) : bookings.filter((b) => b.status === "completed").length === 0 ? (
+          <div className="p-6 text-gray-500">No completed bookings.</div>
+        ) : (
+          <ul role="list" className="divide-y divide-gray-200">
+            {bookings
+              .filter((b) => b.status === "completed")
+              .map((b) => (
+                <li key={b._id} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-indigo-600">
+                        {b.vehicleId?.name || "Vehicle"}
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {b.fromPincode} → {b.toPincode}
+                      </p>
+                      <p className="mt-1 text-sm text-gray-700">
+                        Booker:{" "}
+                        <span className="font-medium">
+                          {b.customerName || "-"}
+                        </span>{" "}
+                        ({b.customerPhone || "-"})
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {formatDateTime(b.startTime)} —{" "}
+                        {formatDateTime(b.endTime)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-200 text-gray-700">
+                        Completed
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              ))}
           </ul>
         )}
       </div>

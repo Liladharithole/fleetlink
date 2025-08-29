@@ -52,9 +52,19 @@ export default function AddVehicle() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white/90 backdrop-blur rounded-xl shadow-sm ring-1 ring-gray-100 overflow-hidden">
         <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-          <h1 className="text-2xl font-semibold text-gray-800">
+          <h1 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded bg-indigo-50 text-indigo-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="h-4 w-4"
+              >
+                <path d="M12 2a10 10 0 100 20 10 10 0 000-20zM8 12h8M12 8v8" />
+              </svg>
+            </span>
             Add New Vehicle
           </h1>
           <p className="mt-1 text-sm text-gray-600">
@@ -110,6 +120,10 @@ export default function AddVehicle() {
                           type="button"
                           className="px-3 py-1.5 rounded bg-red-600 text-white text-sm disabled:opacity-50"
                           onClick={async () => {
+                            const ok = window.confirm(
+                              `Are you sure you want to remove "${v.name}"?`
+                            );
+                            if (!ok) return;
                             try {
                               setActionLoadingId(v._id);
                               await deleteVehicle(v._id);
