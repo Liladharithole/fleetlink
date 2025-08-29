@@ -3,14 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
- "scripts": {
-  "dev": "nodemon src/server.js",
-  "test": "cross-env NODE_ENV=test jest --runInBand"
-},
+  "type": "module",
+  "scripts": {
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --forceExit"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -19,6 +18,9 @@
     "mongoose": "^8.18.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "babel-jest": "^30.1.1",
     "cross-env": "^10.0.0",
     "jest": "^30.1.1",
     "nodemon": "^3.1.10",

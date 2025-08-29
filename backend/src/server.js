@@ -12,6 +12,7 @@ connectDB(MONGODB_URI)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`API running on http://localhost:${PORT}`);
+      console.log(`Connected to Database`);
     });
   })
   .catch((err) => {
