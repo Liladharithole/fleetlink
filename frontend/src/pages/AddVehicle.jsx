@@ -1,46 +1,63 @@
 import { useState } from "react";
 import VehicleForm from "../components/VehicleForm";
 import { addVehicle } from "../services/api";
+import BookingConfirmation from "../components/BookingConfirmation";
 
 export default function AddVehicle() {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleAddVehicle = async (payload) => {
     try {
-      const { data } = await addVehicle(payload);
+      await addVehicle(payload);
       setMessage("Vehicle added successfully!");
       setIsError(false);
+      setShowSuccess(true);
+      // Clear the success message after 5 seconds
+      setTimeout(() => {
+        setMessage("");
+        setShowSuccess(false);
+      }, 5000);
     } catch (err) {
-      setMessage("Failed to add vehicle. Please try again.");
+      setMessage(
+        err.response?.data?.message ||
+          "Failed to add vehicle. Please try again."
+      );
       setIsError(true);
+      setShowSuccess(false);
     }
-    setTimeout(() => setMessage(""), 5000);
   };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800">Add New Vehicle</h2>
-          <p className="text-gray-600 mt-1">Enter the vehicle details below</p>
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Add New Vehicle
+          </h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Fill in the details below to add a new vehicle to the fleet.
+          </p>
         </div>
 
         <div className="p-6">
           {message && (
-            <div
-              className={`mb-6 p-4 rounded-md ${
-                isError
-                  ? "bg-red-100 border-l-4 border-red-500 text-red-700"
-                  : "bg-green-100 border-l-4 border-green-500 text-green-700"
-              }`}
-            >
-              <p className="font-medium">{message}</p>
-            </div>
+            <BookingConfirmation
+              message={message}
+              type={isError ? "error" : "success"}
+              onClose={() => {
+                setMessage("");
+                setShowSuccess(false);
+              }}
+            />
           )}
 
           <div className="bg-white rounded-lg">
-            <VehicleForm onSubmit={handleAddVehicle} />
+            <VehicleForm
+              onSubmit={handleAddVehicle}
+              showSuccess={showSuccess}
+            />
           </div>
         </div>
       </div>
