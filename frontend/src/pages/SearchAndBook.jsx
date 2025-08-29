@@ -23,7 +23,11 @@ export default function SearchAndBook() {
       };
 
       const res = await searchVehicles(params);
-      setLastSearch(params);
+      setLastSearch({
+        ...params,
+        customerName: form.customerName,
+        customerPhone: form.customerPhone,
+      });
 
       const vehiclesWithDuration = (res.data.vehicles || []).map((v) => ({
         ...v,
@@ -51,6 +55,8 @@ export default function SearchAndBook() {
       fromPincode: lastSearch.fromPincode,
       toPincode: lastSearch.toPincode,
       startTime: lastSearch.startTime,
+      customerName: lastSearch.customerName,
+      customerPhone: lastSearch.customerPhone,
       customerId: "cust123", // In a real app, get this from auth context
     };
 

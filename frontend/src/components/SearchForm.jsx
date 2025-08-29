@@ -6,6 +6,8 @@ export default function SearchForm({ onSearch }) {
     fromPincode: "",
     toPincode: "",
     startTime: "",
+    customerName: "",
+    customerPhone: "",
   });
 
   const handleChange = (e) =>
@@ -97,6 +99,46 @@ export default function SearchForm({ onSearch }) {
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
             placeholder="e.g., 110001"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label
+            htmlFor="customerName"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Customer Name
+          </label>
+          <input
+            id="customerName"
+            name="customerName"
+            type="text"
+            value={form.customerName}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+            placeholder="e.g., John Doe"
+            required
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="customerPhone"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Customer Phone
+          </label>
+          <input
+            id="customerPhone"
+            name="customerPhone"
+            type="tel"
+            value={form.customerPhone}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+            placeholder="e.g., +91 9876543210"
             required
           />
         </div>

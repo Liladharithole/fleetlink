@@ -1,12 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import VehicleForm from "../components/VehicleForm";
-import { addVehicle } from "../services/api";
+import { addVehicle, getVehicles, deleteVehicle } from "../services/api";
 import BookingConfirmation from "../components/BookingConfirmation";
 
 export default function AddVehicle() {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState("");
+
+  const loadVehicles = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getVehicles();
+      setVehicles(data.data || []);
+    } catch (err) {
+      setMessage("Failed to load vehicles.");
+      setIsError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadVehicles();
+  }, []);
 
   const handleAddVehicle = async (payload) => {
     try {
@@ -14,6 +34,7 @@ export default function AddVehicle() {
       setMessage("Vehicle added successfully!");
       setIsError(false);
       setShowSuccess(true);
+      await loadVehicles();
       // Clear the success message after 5 seconds
       setTimeout(() => {
         setMessage("");
@@ -58,6 +79,58 @@ export default function AddVehicle() {
               onSubmit={handleAddVehicle}
               showSuccess={showSuccess}
             />
+          </div>
+
+          <div className="mt-10">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">
+              Current Vehicles
+            </h2>
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              {loading ? (
+                <div className="p-6 text-gray-500">Loading...</div>
+              ) : vehicles.length === 0 ? (
+                <div className="p-6 text-gray-500">No vehicles added yet.</div>
+              ) : (
+                <ul role="list" className="divide-y divide-gray-200">
+                  {vehicles.map((v) => (
+                    <li
+                      key={v._id}
+                      className="px-6 py-4 flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {v.name}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-500">
+                          {v.capacityKg} kg · {v.tyres} tyres
+                        </p>
+                      </div>
+                      <div>
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 rounded bg-red-600 text-white text-sm disabled:opacity-50"
+                          onClick={async () => {
+                            try {
+                              setActionLoadingId(v._id);
+                              await deleteVehicle(v._id);
+                              await loadVehicles();
+                            } catch (e) {
+                              setMessage("Failed to delete vehicle");
+                              setIsError(true);
+                            } finally {
+                              setActionLoadingId("");
+                            }
+                          }}
+                          disabled={actionLoadingId === v._id}
+                        >
+                          {actionLoadingId === v._id ? "..." : "Remove"}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
       </div>

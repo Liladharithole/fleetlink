@@ -5,6 +5,17 @@ import { createVehicleSchema } from "../validators/vehicles.js";
 
 const router = Router();
 
+// GET /api/vehicles
+router.get("/", async (_req, res) => {
+  try {
+    const vehicles = await Vehicle.find().sort({ createdAt: -1 });
+    return res.json({ data: vehicles });
+  } catch (error) {
+    console.error("Error listing vehicles:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // POST /api/vehicles
 router.post("/", async (req, res) => {
   // Validate request body against schema
@@ -55,8 +66,8 @@ router.get("/available", async (req, res) => {
   }
 
   try {
-    // Simple estimation: 2 hours for any trip
-    const estimatedRideDurationHours = 2;
+    // Block the whole day by default for availability purposes
+    const estimatedRideDurationHours = 24;
 
     // Get vehicles with sufficient capacity
     const vehicles = await Vehicle.find({
@@ -66,9 +77,8 @@ router.get("/available", async (req, res) => {
     // Filter out vehicles with overlapping bookings
     const availableVehicles = [];
     const start = new Date(startTime);
-    const end = new Date(
-      start.getTime() + estimatedRideDurationHours * 60 * 60 * 1000
-    );
+    const end = new Date(start);
+    end.setHours(23, 59, 59, 999);
 
     for (const vehicle of vehicles) {
       const overlappingBooking = await Booking.findOne({
@@ -92,6 +102,21 @@ router.get("/available", async (req, res) => {
       estimatedRideDurationHours: 0,
       vehicles: [],
     });
+  }
+});
+
+// DELETE /api/vehicles/:id
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Vehicle.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Vehicle not found" });
+    }
+    return res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting vehicle:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

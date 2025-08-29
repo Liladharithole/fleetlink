@@ -6,5 +6,7 @@ export const createBookingSchema = Joi.object({
   toPincode: Joi.string().required(),
   startTime: Joi.string().isoDate().required(),
   endTime: Joi.string().isoDate().optional(),
+  customerName: Joi.string().min(2).max(100).optional(),
+  customerPhone: Joi.string().min(7).max(20).optional(),
   customerId: Joi.string().required(),
 });
