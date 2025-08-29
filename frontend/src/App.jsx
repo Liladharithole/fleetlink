@@ -149,6 +149,7 @@ export default function App() {
             </p>
           </div>
         </footer>
+        
       </div>
     </BrowserRouter>
   );
